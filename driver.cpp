@@ -10,18 +10,13 @@ int main(int argc, char *argv[]) {
         std::cout << "[WIDTH] [HEIGHT] [PIECES TO WIN] [EPOCHS]" << std::endl;
         return 0;
     }
-    
-    std::cout << argv[1];
-    std::cout << argv[2];
     int width = atoi(argv[1]);
     int height = atoi(argv[2]);
     int to_win = atoi(argv[3]);
     int n_epochs = atoi(argv[4]);;
 
-
+    // The game object the Qs will play on
     Game * game = new Game();
-    // number of training epochs to perform
-
 
     // Init two AI
     QLearner * AI = new QLearner(game, 0.5, 10, 1);
@@ -33,23 +28,30 @@ int main(int argc, char *argv[]) {
     trainAI(AI, OPP_AI, game, n_epochs);
     AI->saveQ("AI_MAIN.txt");
 
-    std::cout << "1/2 close/play" << std::endl;
+    std::cout << std::endl << "select 1/2 close/play" << std::endl;
     int input = 0;
     std::cin >> input;
     if (input == 2) {
         humanMatch(AI, game);
     }
-
     return 0;
 }
 
 
-// TODO abstract to any player type
+/**
+ * Trains two given AI against one another in a given Game.
+ * @param red the winner AI (moves first)
+ * @param black the loser AI (moves second)
+ * @param game the Game obj. that the two AIs are playing in
+ * @param n_epochs total number of epochs to train for
+ * @return non-zero on error
+ */
 int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
     int games_won[2] = {0, 0};
     clock_t begin_time = clock();
 
-    float info_epochs = 10000; // how often to print info
+    // how often to print info
+    float info_epochs = 10000;
 
     for (int i = 0; i < n_epochs; i++) {
 
@@ -89,7 +91,6 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
 
             // On win, record, reset, and restart
             if (winner) {
-                game->printBoard();
                 switch (winner) {
                     case -1:
                         games_won[0]++;
@@ -109,6 +110,13 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
     return 0;
 }
 
+
+/**
+ * Allows manual playing against a QLearner AI object.
+ * @param AI a QLearner AI, must be trained beforehand or will lose. Plays red.
+ * @param game the Game obj. to play against the AI in.
+ * @return non-zero on error
+ */
 int humanMatch(QLearner * AI, Game * game) {
     int i = 0;
     while(1) {

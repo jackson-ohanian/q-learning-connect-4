@@ -6,6 +6,15 @@
 #include <vector>
 #include <bitset>
 
+
+/**
+ * Game class
+ *
+ * A Game object represents a board that can be played on as well as
+ * a set of tools for analyzing the state of the board, and checking
+ * validity of making plays on that board.
+ */
+ 
 class Game {
     public:
         /**

@@ -1,8 +1,19 @@
 #include "game.h"
 
-// Game Constructor
+/**
+ * Game class
+ *
+ * A Game object represents a board that can be played on as well as
+ * a set of tools for analyzing the state of the board, and checking
+ * validity of making plays on that board.
+ */
+
+
+/**
+ * Game constructor
+ */
 Game::Game() {
-    // init board to 0
+    // init board to empty (0)
     for (int i = 0; i < HEIGHT; i++) {
         board[i] = new int [HEIGHT];
         for (int j = 0; j < WIDTH; j++) {
@@ -11,6 +22,11 @@ Game::Game() {
     }
 }
 
+
+/*
+* Reset the board to it's initial (empty) state
+* @return void
+*/
 void Game::resetGame() {
     // reset all values to empty (0)
     for (int i = 0; i < HEIGHT; i++) {
@@ -22,8 +38,11 @@ void Game::resetGame() {
     return;
 }
 
-/** Not meant to be visually parsable - meant for Q AI */
-/** Hashes board layout */
+
+/**
+ * Hashes the current board uniquely for sake of Q learner
+ * @return a unique hash of the board
+ */
 size_t Game::getBoard() {
     // using builtin std::hash, hash any board to a representative size_t
     std::hash<std::string> hash;
@@ -39,6 +58,11 @@ size_t Game::getBoard() {
     return hash(s);
 }
 
+
+/**
+ * Hashes the board after a new move uniquely for sake of Q learner
+ * @return a unique hash of the board
+ */
 size_t Game::getFutureBoard(int coord, int player) {
     std::hash<std::string> hash;
     std::string s = "";
@@ -51,8 +75,11 @@ size_t Game::getFutureBoard(int coord, int player) {
 }
 
 
-/** Print current Game Board */
-void Game::printBoard() {
+/**
+ * Prints the current game board to std out
+ * @return void
+ */
+ void Game::printBoard() {
     std::cout << std::endl;
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
@@ -76,6 +103,11 @@ void Game::printBoard() {
     return;
 }
 
+
+/**
+ * Checks if a certain drop is valid (not full on coord)
+ * @return 0 valid, -1 invalid
+ */
 int Game::validMove(int coord) {
     // A move is invalid if the column is full, or if the coord is invalid
     if (coord < 0 || coord >= WIDTH || board[0][coord] != 0) {
@@ -85,8 +117,13 @@ int Game::validMove(int coord) {
     return 0;
 }
 
-/* Drop piece off of given x coord */
-/* Return y-coord placed, -1 on full */
+
+/**
+ * Drops a piece into the board
+ * @param coord the x-coordinate to drop from
+ * @param player the id of the player to mark the piece
+ * @return the y-coord the piece landed at, -1 on fail/full board
+ */
 int Game::dropPiece(int coord, int player) {
     // Column is full, return -1
     if (validMove(coord) != 0) {
@@ -107,6 +144,11 @@ int Game::dropPiece(int coord, int player) {
     return bottom;
 }
 
+
+/**
+ * Identify if the current board is completely full
+ * @return true if full, false otherwise
+ */
 bool Game::boardIsFull() {
     for (int i = 0; i < HEIGHT; i++) {
         if (board[0][i] == 0)
@@ -115,7 +157,11 @@ bool Game::boardIsFull() {
     return true;
 }
 
-/* Check for win on current board */
+
+/**
+ * Checks if there is a winner (4 in a row) on the board
+ * @return the id of the winner, 0 on no winner
+ */
 int Game::checkForWin() {
     int current = 0;
     int streak = 0;

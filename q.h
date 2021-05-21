@@ -10,12 +10,21 @@
 #include <time.h>
 #include "fstream"
 
+
+/**
+ * QLearner class
+ *
+ * A QLearner object represents a policy reinforcement Q learner that
+ * makes moves based on the dominant outcome reward for any given Game
+ * objects Game::getBoard.
+ */
+
 class QLearner {
     public:
+        /**
+         * QLearner Constructor
+         */
         QLearner(Game * game, double a, int e, int id);
-        int newTrain();
-
-        int loadTrain();
 
         /**
          * Have this AI make a move based on the current state, training
@@ -49,28 +58,48 @@ class QLearner {
          * @return a Q table
          */
         std::map<size_t, std::vector<float>*> loadQ(std::string fname);
-        int checkQTable(size_t hash);
+
+        /**
+         * Print the rewards vector for the current state to std out
+         * @return void
+         */
         void showRews();
 
     private:
+        // The Q table for this QLearner
         std::map<size_t, std::vector<float>*> table;
-        size_t hashBoard();
+
+        /**
+         * Make a greedy move based on the current Q table
+         * @return the coordinate to drop a piece with maximum reward
+         */
         int greedyMove();
+
+        // The game that this QLearner is playing in
         Game * game;
+
+        // The current state of the current game
         size_t state;
+
+        // The current (most recent) action taken by this learner
         int action;
+
+        // The game id (-1/1) = (red/black) of this QLearner
         int id;
 
         // Learning rate alpha
         double alpha;
 
-        // Discount factor gamma
+        // define epsilon greedy action with random action chance 1/epsilon
         int epsilon;
 
-        // training track
+        // a file to save Q Table to
         std::ofstream save_movement;
 
+        // The board height
         const int HEIGHT = 3;
+
+        // The board width
         const int WIDTH = 3;
 
 
