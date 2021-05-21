@@ -14,7 +14,7 @@
  * a set of tools for analyzing the state of the board, and checking
  * validity of making plays on that board.
  */
- 
+
 class Game {
     public:
         /**
@@ -82,11 +82,4 @@ class Game {
         static const int TO_WIN = 3;
         // The game board used by this Game
         int* board[WIDTH];
-};
-
-class Player {
-    public:
-        Player();
-
-    private:
 };

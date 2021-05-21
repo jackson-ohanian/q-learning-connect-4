@@ -53,12 +53,13 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
     // how often to print info
     float info_epochs = 10000;
 
+    // Play n_epochs matches in training mode
     for (int i = 0; i < n_epochs; i++) {
 
         // Small tool for tracking speed and progress of training
         if (i % 10000 == 0 && i != 0) {
             float t = float( clock () - begin_time ) /  CLOCKS_PER_SEC;
-            std::cout << "game: " << i << " games/sec: " <<(int)(info_epochs / t)<< std::endl;
+            std::cout << "game: " << i << "/" << n_epochs << " games/sec: " <<(int)(info_epochs / t)<< std::endl;
             begin_time = clock();
         }
 
@@ -136,6 +137,8 @@ int humanMatch(QLearner * AI, Game * game) {
         AI->showRews();
         // if a winner is found on this turn
         if (winner) {
+
+            // print and reset board before continuing
             game->printBoard();
             game->resetGame();
 

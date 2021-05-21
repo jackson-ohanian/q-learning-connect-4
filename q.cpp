@@ -40,6 +40,10 @@ int QLearner::makeMove(bool train) {
 }
 
 
+/**
+ * Make a greedy move based on the current Q table (private)
+ * @return the coordinate to drop a piece with maximum reward
+ */
 int QLearner::greedyMove() {
     size_t hash = game->getBoard();
 
@@ -111,15 +115,11 @@ int QLearner::update(int winner, int player, int move, size_t hash) {
         r = 0;
     }
 
+    // update with standard Q learning / gamma decay rate 0.7
     float exp_future_reward = it_fut->second->at(this->action);
     float new_ = old_reward + 0.5 * (r + 0.7 *  exp_future_reward);
     it->second->at(this->action) = new_;
     this->state = state;
-
-
-    game->printBoard();
-    showRews();
-
 
     return r;
 }
