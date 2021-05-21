@@ -1,11 +1,26 @@
 #include "driver.h"
 
 int main(int argc, char *argv[]) {
+
     srand(time(NULL));
+
+    // Parse command line args
+    if (argc != 5) {
+        std::cout << "USAGE" << std::endl;
+        std::cout << "[WIDTH] [HEIGHT] [PIECES TO WIN] [EPOCHS]" << std::endl;
+        return 0;
+    }
+    
+    std::cout << argv[1];
+    std::cout << argv[2];
+    int width = atoi(argv[1]);
+    int height = atoi(argv[2]);
+    int to_win = atoi(argv[3]);
+    int n_epochs = atoi(argv[4]);;
+
 
     Game * game = new Game();
     // number of training epochs to perform
-    int n_epochs = 10;
 
 
     // Init two AI
