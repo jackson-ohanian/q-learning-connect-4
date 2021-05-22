@@ -19,3 +19,14 @@ Q reinforcement learning applied to the connect 4 game.
   Command line arguments enable loading a file with Q table information. Giving a filename arg automatically loads from and saves to that file. If the convulation
   size is changed, the board hashes will become useless, and the new save will overwrite with a mix of sized hashes and rewards, making the save file useless.
 
+## Human Match ## 
+  A board allows human input against the trained AI. Numeric 1-7 to drop a piece.
+
+□ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ 
+□ □ □ □ □ □ □ 
+□ □ □ ◉ □ □ □ 
+
+
