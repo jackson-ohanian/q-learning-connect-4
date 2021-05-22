@@ -18,6 +18,8 @@ Q RL applied to the connect 4 game.
   While focused on training the dominant AI (red), I have been increasing the chance of non-greedy action in the second AI to ensure some different plays come up 
   through randomness. 
   
+  Meaningful results appear quickly, the AI becomes mostly competent around a million epochs. 
+  
 ## Loading Training Data ##
 
   Command line arguments enable loading a file with Q table information. Giving a filename arg automatically loads from and saves to that file. If the convulation
