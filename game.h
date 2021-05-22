@@ -26,7 +26,7 @@ class Game {
         * Prints the current game board to std out
         * @return void
         */
-        void printBoard();
+        std::string printBoard();
 
         /**
          * Drops a piece into the board
@@ -73,13 +73,15 @@ class Game {
          */
          bool boardIsFull();
 
+         // The board of this game
+         int* board[7];
+
     private:
         // Const. Width of the board
-        static const int HEIGHT = 3;
+        static const int HEIGHT = 6;
         // Const. Height of the board
-        static const int WIDTH = 3;
+        static const int WIDTH = 7;
         //pieces in a row to win
-        static const int TO_WIN = 3;
+        static const int TO_WIN = 4;
         // The game board used by this Game
-        int* board[WIDTH];
 };

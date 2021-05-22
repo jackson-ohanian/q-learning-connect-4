@@ -1,39 +1,62 @@
 #include "driver.h"
 
+/**
+ * Enter here.
+ * Takes command line arguments:
+ * [EPOCHS] [FILTER SIZE] [opt. LOAD/SAVE FNAME (no ext.)]
+ */
 int main(int argc, char *argv[]) {
-
+    std::cout << " " << std::endl;
     srand(time(NULL));
 
     // Parse command line args
-    if (argc != 5) {
+    if (argc < 3 || argc > 4) {
         std::cout << "USAGE" << std::endl;
-        std::cout << "[WIDTH] [HEIGHT] [PIECES TO WIN] [EPOCHS]" << std::endl;
+        std::cout << "[EPOCHS] [FILTER SIZE] [opt. LOAD/SAVE FNAME (no ext.)]" << std::endl;
         return 0;
     }
-    int width = atoi(argv[1]);
-    int height = atoi(argv[2]);
-    int to_win = atoi(argv[3]);
-    int n_epochs = atoi(argv[4]);;
+    int n_epochs = atoi(argv[1]);
+    int filter_size = atoi(argv[2]);
+
 
     // The game object the Qs will play on
     Game * game = new Game();
 
     // Init two AI
-    QLearner * AI = new QLearner(game, 0.5, 10, 1);
-    QLearner * OPP_AI = new QLearner(game, 0.5, 2, -1);
+    QLearner * AI = new QLearner(game, 0.5, 5, 1, 4);
+    QLearner * OPP_AI = new QLearner(game, 0.5, 2, -1, 4);
+
+
+    // load data for main AI if applicable
+    std::string fname = "";
+    if (argc == 4) {
+        fname = argv[3];
+        fname += ".qtable";
+        AI->loadQ(fname);
+    }
 
     // start training our two AI against one another
-    std::cout << std::endl << "start training for " << n_epochs << " epochs..." << std::endl;
-
+    std::cout << std::endl << "\033[1;7;36mSTART TRAINING\033[0m" << std::endl;
     trainAI(AI, OPP_AI, game, n_epochs);
-    AI->saveQ("AI_MAIN.txt");
+    std::cout << std::endl<<"\033[1;7;36mSTOP TRAINING\033[0m" << std::endl;
 
-    std::cout << std::endl << "select 1/2 close/play" << std::endl;
-    int input = 0;
-    std::cin >> input;
-    if (input == 2) {
-        humanMatch(AI, game);
+
+    if (argc == 4) {
+        AI->saveQ(fname);
     }
+
+    // Human v Bot gameplay loop
+    while (true) {
+        std::cout << std::endl << "\033[1;7;4;36m hit p to play \033[0m"  << std::endl;
+        char input = 0;
+        std::cin >> input;
+        if (input == 'p') {
+            humanMatch(AI, game);
+        } else {
+            break;
+        }
+    }
+
     return 0;
 }
 
@@ -51,15 +74,15 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
     clock_t begin_time = clock();
 
     // how often to print info
-    float info_epochs = 10000;
+    int info_epochs = n_epochs / 10;
 
     // Play n_epochs matches in training mode
     for (int i = 0; i < n_epochs; i++) {
 
         // Small tool for tracking speed and progress of training
-        if (i % 10000 == 0 && i != 0) {
+        if (i % info_epochs == 0 && i != 0) {
             float t = float( clock () - begin_time ) /  CLOCKS_PER_SEC;
-            std::cout << "game: " << i << "/" << n_epochs << " games/sec: " <<(int)(info_epochs / t)<< std::endl;
+            std::cout << "\r\033[1;7;36mGAME: " << i << "/" << n_epochs << " games/sec: " <<(int)(info_epochs / t)<< "\033[0m" << std::flush;
             begin_time = clock();
         }
 
@@ -67,14 +90,16 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
         while (true) {
             // take turns of two players dropping a piece / checking status
             // red moves first then update board
+
             size_t curr_board_hash = game->getBoard();
             int move = red->makeMove(true);
-            game->dropPiece(move, -1);
             int winner = game->checkForWin();
 
             // update Q tables of red and black
             red->update(winner, -1, move, curr_board_hash);
             black->update(winner, -1, move, curr_board_hash);
+
+            game->dropPiece(move, -1);
 
             // update board to represent the current state
             curr_board_hash = game->getBoard();
@@ -82,12 +107,14 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
             // iff there is no winner, black makes it's move then update board
             if (!winner && !game->boardIsFull()) {
                 int move = black->makeMove(true);
-                game->dropPiece(move, 1);
                 winner = game->checkForWin();
 
                 // update Q tables of red and black
                 black->update(winner, 1, move, curr_board_hash);
                 red->update(winner, 1, move, curr_board_hash);
+
+                game->dropPiece(move, 1);
+
             }
 
             // On win, record, reset, and restart
@@ -107,7 +134,6 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
         }
 
     }
-    std::cout << std::endl << "training complete... " << games_won[0] << ":" << games_won[1] << std::endl;
     return 0;
 }
 
@@ -120,21 +146,24 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
  */
 int humanMatch(QLearner * AI, Game * game) {
     int i = 0;
+    std::string board_txt = "";
     while(1) {
         i++;
         // play red (AI) move
-        game->dropPiece(AI->makeMove(false), -1);
+        int AI_move = AI->makeMove(false);
+        game->dropPiece(AI_move, -1);
         int winner = game->checkForWin();
-        game->printBoard();
+        board_txt = game->printBoard();
+        std::cout << "\r" << board_txt << std::flush;
 
+        AI->showRews();
         // if red didn't win, it is blacks(user) move - get input, make move
         if (!winner && !game->boardIsFull()) {
             int move = 0;
             std::cin >> move;
-            game->dropPiece(move, 1);
+            game->dropPiece(move-1, 1);
             winner = game->checkForWin();
         }
-        AI->showRews();
         // if a winner is found on this turn
         if (winner) {
 

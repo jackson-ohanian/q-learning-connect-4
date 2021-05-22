@@ -79,28 +79,30 @@ size_t Game::getFutureBoard(int coord, int player) {
  * Prints the current game board to std out
  * @return void
  */
- void Game::printBoard() {
-    std::cout << std::endl;
+ std::string Game::printBoard() {
+    std::string brd = "";
+    brd += "\n";
+
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
 
             // empty box utf iff empty
             if (board[i][j] == 0) {
-                std::cout << "\u25a1" << " ";
+                brd += "\u25a1 ";
             }
 
             // assign pieces marked 1 as an x
             else if (board[i][j] == 1) {
-                std::cout << "x" << " ";
+                brd += "\033[1;34m\u25c9\033[0m ";
 
             // assign pieces marked -1 as an o
             } else {
-                std::cout << "o" << " ";
+                brd += "\033[1;31m\u25c9\033[0m ";
             }
         }
-        std::cout << std::endl;
+        brd += "\n";
     }
-    return;
+    return brd;
 }
 
 

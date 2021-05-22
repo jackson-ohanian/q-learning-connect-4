@@ -24,7 +24,7 @@ class QLearner {
         /**
          * QLearner Constructor
          */
-        QLearner(Game * game, double a, int e, int id);
+        QLearner(Game * game, double a, int e, int id, int fsize);
 
         /**
          * Have this AI make a move based on the current state, training
@@ -47,17 +47,18 @@ class QLearner {
         int update(int winner, int player, int move, size_t hash);
 
         /**
-         * Save the current Q table for this AI to CSV-like file
+         * Save the current Q table for this AI to CSV-like file.
+         * (comma seperated values in newline seperated states)
          * @return 0 on success, non-zero on file error/fail to write
          */
         int saveQ(std::string fname);
 
         /**
          * Load a Q table from file, and apply to this AI. Formatted as saveQ
-         * formats
+         * formats (comma seperated values in newline seperated states)
          * @return a Q table
          */
-        std::map<size_t, std::vector<float>*> loadQ(std::string fname);
+        int loadQ(std::string fname);
 
         /**
          * Print the rewards vector for the current state to std out
@@ -75,32 +76,44 @@ class QLearner {
          */
         int greedyMove();
 
+        /**
+         * Creates hashes of the filter applied to each possible location
+         * on the board.
+         * @return an array of hashes in L->R T->D order
+         */
+        size_t* convGreedyDecider();
+
+        /**
+         * Find the best move for the current sub-state
+         * @return the best (most rewarded) move
+         */
+        int bestFromState(size_t state, float target);
+
         // The game that this QLearner is playing in
         Game * game;
-
         // The current state of the current game
         size_t state;
-
         // The current (most recent) action taken by this learner
         int action;
-
         // The game id (-1/1) = (red/black) of this QLearner
         int id;
-
         // Learning rate alpha
         double alpha;
-
         // define epsilon greedy action with random action chance 1/epsilon
         int epsilon;
-
         // a file to save Q Table to
         std::ofstream save_movement;
-
         // The board height
-        const int HEIGHT = 3;
-
+        const int HEIGHT = 6;
         // The board width
-        const int WIDTH = 3;
-
+        const int WIDTH = 7;
+        // The maximum reward in the current state
+        float max_reward;
+        // The size of the filters used
+        int filter_size;
+        // The relative action taken in the current sub-state
+        int relative_action;
+        // the locations of eahc current sub-state
+        int* sub_state_locations;
 
 };
