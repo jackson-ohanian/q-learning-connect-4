@@ -21,12 +21,3 @@ Q reinforcement learning applied to the connect 4 game.
 
 ## Human Match ## 
   A board allows human input against the trained AI. Numeric 1-7 to drop a piece.
-
-□ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ 
-□ □ □ □ □ □ □ 
-□ □ □ ◉ □ □ □ 
-
-
