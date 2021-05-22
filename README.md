@@ -1,6 +1,10 @@
 # q-learning-connect-4 #
 Q RL applied to the connect 4 game. 
 
+## Usage ## 
+
+  Run driver.cpp with c++11 or higher.
+  
 ## About the Training ##
 
   Double Q Learning, two AIs compete for given epochs, focused on training one and using the other to influence that training. 
@@ -15,8 +19,10 @@ Q RL applied to the connect 4 game.
   through randomness. 
   
 ## Loading Training Data ##
+
   Command line arguments enable loading a file with Q table information. Giving a filename arg automatically loads from and saves to that file. If the convulation
   size is changed, the board hashes will become useless, and the new save will overwrite with a mix of sized hashes and rewards, making the save file useless.
 
 ## Human Match ## 
+
   A board allows human input against the trained AI. Numeric 1-7 to drop a piece. 
