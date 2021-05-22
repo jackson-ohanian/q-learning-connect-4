@@ -59,6 +59,9 @@ int QLearner::greedyMove() {
     for (int ix = 0; ix < 12; ix++) {
         left_pos = this->sub_state_locations[ix];
         int act = bestFromState(hashes[ix], max_so_far);
+        if (game->validMove(left_pos + act)) {
+            continue;
+        }
         if (this->max_reward > max_so_far) {
             to_drop = act + left_pos;
             this->relative_action = act;

@@ -74,7 +74,7 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
     clock_t begin_time = clock();
 
     // how often to print info
-    int info_epochs = n_epochs / 10;
+    int info_epochs = 1000;
 
     // Play n_epochs matches in training mode
     for (int i = 0; i < n_epochs; i++) {
@@ -156,7 +156,6 @@ int humanMatch(QLearner * AI, Game * game) {
         board_txt = game->printBoard();
         std::cout << "\r" << board_txt << std::flush;
 
-        AI->showRews();
         // if red didn't win, it is blacks(user) move - get input, make move
         if (!winner && !game->boardIsFull()) {
             int move = 0;
