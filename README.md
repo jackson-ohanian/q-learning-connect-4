@@ -1,5 +1,5 @@
 # q-learning-connect-4 #
-Q reinforcement learning applied to the connect 4 game. 
+Q RL applied to the connect 4 game. 
 
 
 ## About the Training ##
@@ -7,8 +7,8 @@ Q reinforcement learning applied to the connect 4 game.
   Double Q Learning, two AIs compete for given epochs, focused on training one and using the other to influence that training. 
 
   A convulation-like filter is put over the board (stride=1, padding=0) the larger the size the more computational power and memory is needed.. to do a full 7x6 
-  board is pretty signifigant (some billions of boards from quick math), anything under 4 is borderline useless. The downside here is he will miss blocks sometimes.
-  More info in header documentation.
+  board is pretty signifigant (some billions of boards from quick math), anything under 4 is borderline useless. The downside here is he will miss blocks sometimes
+  chasing a high reward play on a different side of the board. More info in header documentation.
   
   Training is epsilon greedy to encourage exploratory action. High decay rate to give the AI more freedom to make multi-turn plays. 
   
@@ -20,4 +20,4 @@ Q reinforcement learning applied to the connect 4 game.
   size is changed, the board hashes will become useless, and the new save will overwrite with a mix of sized hashes and rewards, making the save file useless.
 
 ## Human Match ## 
-  A board allows human input against the trained AI. Numeric 1-7 to drop a piece.
+  A board allows human input against the trained AI. Numeric 1-7 to drop a piece. 
