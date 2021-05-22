@@ -1,8 +1,8 @@
-# q-learning-connect-4
+## q-learning-connect-4
 Q reinforcement learning applied to the connect 4 game. 
 
 
-About the Training
+##About the Training
 
   Double Q Learning, two AIs compete for given epochs, focused on training one and using the other to influence that training. 
 
@@ -15,4 +15,6 @@ About the Training
   While focused on training the dominant AI (red), I have been increasing the chance of non-greedy action in the second AI to ensure some different plays come up 
   through randomness. 
   
-  
+##Loading training
+  Command line arguments enable loading a file with Q table information. Giving a filename arg automatically loads from and saves to that file. If the convulation
+  size is changed, the board hashes will become useless, and the new save will overwrite with a mix of sized hashes and rewards, making the save file useless.
