@@ -87,13 +87,19 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
         }
 
         // Play until a win or full board
+        int current_turn = 0;
         while (true) {
             // take turns of two players dropping a piece / checking status
             // red moves first then update board
 
             size_t curr_board_hash = game->getBoard();
             int move = red->makeMove(true);
-            int winner = game->checkForWin();
+
+            // only check after win is possibe, save a little time
+            int winner = 0;
+            if (current_turn > 7) {
+                winner = game->checkForWin();
+            }
 
             // update Q tables of red and black
             red->update(winner, -1, move, curr_board_hash);
@@ -107,7 +113,9 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
             // iff there is no winner, black makes it's move then update board
             if (!winner && !game->boardIsFull()) {
                 int move = black->makeMove(true);
-                winner = game->checkForWin();
+                if (current_turn > 7) {
+                    winner = game->checkForWin();
+                }
 
                 // update Q tables of red and black
                 black->update(winner, 1, move, curr_board_hash);
@@ -158,23 +166,30 @@ int humanMatch(QLearner * AI, Game * game) {
 
         // if red didn't win, it is blacks(user) move - get input, make move
         if (!winner && !game->boardIsFull()) {
-            int move = 0;
-            std::cin >> move;
-            game->dropPiece(move-1, 1);
-            winner = game->checkForWin();
+            while (true) {
+                int move = 0;
+                std::cin >> move;
+                // check move is valid / open position
+                if (game->validMove(move-1)) {
+                    std::cout << "pick valid move 1-7" << std::endl;
+                    continue;
+                }
+                game->dropPiece(move-1, 1);
+                winner = game->checkForWin();
+                break;
+            }
         }
         // if a winner is found on this turn
         if (winner) {
-
-            // print and reset board before continuing
-            game->printBoard();
-            game->resetGame();
-
             // Assign the name of the winner and print results
             std::string win_name = "Human";
             if (winner == -1) {
                 win_name = "AI";
             }
+            // print and reset board before continuing
+            board_txt = game->printBoard();
+            std::cout << "\r" << board_txt << std::flush;
+            game->resetGame();
             std::cout << "round " << i << " won by " << win_name << std::endl;
             break;
 

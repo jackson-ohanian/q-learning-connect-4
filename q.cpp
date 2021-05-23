@@ -58,7 +58,7 @@ int QLearner::greedyMove() {
 
     for (int ix = 0; ix < 12; ix++) {
         left_pos = this->sub_state_locations[ix];
-        int act = bestFromState(hashes[ix], max_so_far);
+        int act = bestFromState(hashes[ix], max_so_far, left_pos);
         if (game->validMove(left_pos + act)) {
             continue;
         }
@@ -213,10 +213,19 @@ size_t* QLearner::convGreedyDecider() {
     // For each location, great a filter
     for (int i = 0; i < this->HEIGHT - size; i++) {
         for (int j = 0; j < this->WIDTH - size; j++) {
-
+            int top_row_full = 0;
+            int is_empty = true;
             // For each filter, for a string that represents piece positions
             for (int ix = 0; ix < size; ix++) {
                 for (int jx = 0; jx < size; jx++) {
+                    // handle boards with a full top row / track fullness
+                    if (ix == 0 && this->game->board[i+ix][j+jx] != 0) {
+                        top_row_full++;
+                    }
+                    // check if this sub board is empty
+                    if (this->game->board[i+ix][j+jx] != 0) {
+                        is_empty = false;
+                    }
                     hold_conv += std::to_string((this->game->board[i+ix][j+jx]));
                 }
             }
@@ -226,6 +235,14 @@ size_t* QLearner::convGreedyDecider() {
 
             // Save this hash
             hashes[conv_ct] = hash(hold_conv);
+
+            // handle full top row
+            if (top_row_full == this->filter_size) {
+                hashes[conv_ct] = 0;
+            }
+            if (is_empty) {
+                hashes[conv_ct] = 1;
+            }
             hold_conv = "";
             conv_ct++;
         }
@@ -239,7 +256,7 @@ size_t* QLearner::convGreedyDecider() {
  * Find the best move for the current sub-state
  * @return the best (most rewarded) move
  */
-int QLearner::bestFromState(size_t hash, float target) {
+int QLearner::bestFromState(size_t hash, float target, int left_pos) {
 
     // init for stability on not found (end of itt)
     if (!table.count(hash)) {
@@ -255,7 +272,7 @@ int QLearner::bestFromState(size_t hash, float target) {
     // The next most rewarded value is used until a maximal valid move is found
     float best_rew = 0;
     int ct_stuck = 0;
-    while (this->game->validMove(max) != 0) {
+    while (this->game->validMove(max + left_pos) != 0) {
         best_rew = -100000;
         probs->at(max) = -100000;
         for (int i = 0; i < this->filter_size; i++) {

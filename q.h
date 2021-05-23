@@ -87,7 +87,8 @@ class QLearner {
          * Find the best move for the current sub-state
          * @return the best (most rewarded) move
          */
-        int bestFromState(size_t state, float target);
+        int bestFromState(size_t state, float target, int left_pos);
+
 
         // The game that this QLearner is playing in
         Game * game;

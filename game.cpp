@@ -167,7 +167,7 @@ bool Game::boardIsFull() {
 int Game::checkForWin() {
     int current = 0;
     int streak = 0;
-    // Check for Vertical 4 in a row wins
+    // Check for horizontal 4 in a row wins
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             if (board[i][j] == current && current) {
@@ -176,6 +176,7 @@ int Game::checkForWin() {
                 current = board[i][j]; streak = 0;
             }
             if (streak == TO_WIN - 1) {
+                std::cout << "win in row " << i << std::endl;
                 return current;
             }
         }
@@ -183,7 +184,7 @@ int Game::checkForWin() {
         streak = 0;
     }
 
-    // Check for Horizontal 4 in a row wins
+    // Check for vertical 4 in a row wins
     for (int j = 0; j < WIDTH; j++) {
         for (int i = 0; i < HEIGHT; i++) {
             if (board[i][j] == current && current) {
@@ -197,6 +198,42 @@ int Game::checkForWin() {
         }
         current = 0;
         streak = 0;
+    }
+
+    for (int i = 0; i < HEIGHT; i++) {
+        for (int j = 0; j < WIDTH; j++) {
+            int cont = 0;
+            int streak = 0;
+            current = 0;
+            //Check for SE diaganol
+            while (i + cont < HEIGHT && j + cont < WIDTH) {
+                if (board[i + cont][j + cont] == current && current) {
+                    streak++;
+                } else {
+                    current = board[i + cont][j + cont]; streak = 0;
+                }
+                if (streak == TO_WIN - 1) {
+                    return current;
+                }
+                cont++;
+            }
+            cont = 0;
+            streak = 0;
+            current = 0;
+            // Check for NW diaganol
+            while (i - cont >= 0 && j - cont >= 0) {
+                if (board[i - cont][j - cont] == current && current) {
+                    streak++;
+                } else {
+                    current = board[i - cont][j - cont]; streak = 0;
+                }
+                if (streak == TO_WIN - 1) {
+                    return current;
+                }
+                cont++;
+            }
+
+        }
     }
 
     return 0;
