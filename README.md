@@ -18,7 +18,8 @@ Q RL applied to the connect 4 game.
   While focused on training the dominant AI (red), I have been increasing the chance of non-greedy action in the second AI to ensure some different plays come up 
   through randomness. 
   
-  Meaningful results appear quickly, the AI becomes mostly competent around a million epochs. 
+  Meaningful results appear quickly, the AI becomes mostly competent around a million epochs. Untrained (random) models compete with a win rate around 55% for red,
+  around a hundred thousand epochs this approaches 65%, the tie rate also rises signifigantly. 
   
 ## Loading Training Data ##
 
