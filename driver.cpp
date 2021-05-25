@@ -23,23 +23,21 @@ int main(int argc, char *argv[]) {
     Game * game = new Game();
 
     // Init two AI
-    QLearner * AI = new QLearner(game, 0.5, 5, 1, 4);
-    QLearner * OPP_AI = new QLearner(game, 0.5, 2, -1, 4);
+    QLearner * AI = new QLearner(game, 0.1, 4, 1, filter_size);
+    QLearner * OPP_AI = new QLearner(game, 0.1, 2, -1, filter_size);
 
 
     // load data for main AI if applicable
     std::string fname = "";
     if (argc == 4) {
         fname = argv[3];
-        fname += ".qtable";
+        fname += ".txt";
         AI->loadQ(fname);
     }
 
     // start training our two AI against one another
-    std::cout << std::endl << "\033[1;7;36mSTART TRAINING\033[0m" << std::endl;
+    std::cout << "\033[1;36mSTART TRAINING\033[0m" << std::endl;
     trainAI(AI, OPP_AI, game, n_epochs);
-    std::cout << std::endl<<"\033[1;7;36mSTOP TRAINING\033[0m" << std::endl;
-
 
     if (argc == 4) {
         AI->saveQ(fname);
@@ -70,9 +68,9 @@ int main(int argc, char *argv[]) {
  * @return non-zero on error
  */
 int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
-    int games_won[2] = {0, 0};
     clock_t begin_time = clock();
-
+    int red_wins = 0;
+    int ties = 0;
     // how often to print info
     int info_epochs = 1000;
 
@@ -82,7 +80,7 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
         // Small tool for tracking speed and progress of training
         if (i % info_epochs == 0 && i != 0) {
             float t = float( clock () - begin_time ) /  CLOCKS_PER_SEC;
-            std::cout << "\r\033[1;7;36mGAME: " << i << "/" << n_epochs << " games/sec: " <<(int)(info_epochs / t)<< "\033[0m" << std::flush;
+            std::cout << "\r\033[1;36mGAME: " << i << "/" << n_epochs << " games/sec: " <<(int)(info_epochs / t)<< "\033[0m" << std::flush;
             begin_time = clock();
         }
 
@@ -91,21 +89,21 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
         while (true) {
             // take turns of two players dropping a piece / checking status
             // red moves first then update board
+            current_turn++;
 
             size_t curr_board_hash = game->getBoard();
             int move = red->makeMove(true);
 
             // only check after win is possibe, save a little time
             int winner = 0;
-            if (current_turn > 7) {
+            if (current_turn > 8) {
                 winner = game->checkForWin();
             }
 
             // update Q tables of red and black
             red->update(winner, -1, move, curr_board_hash);
-            black->update(winner, -1, move, curr_board_hash);
 
-            game->dropPiece(move, -1);
+            game->dropPiece(move, 1);
 
             // update board to represent the current state
             curr_board_hash = game->getBoard();
@@ -113,35 +111,37 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
             // iff there is no winner, black makes it's move then update board
             if (!winner && !game->boardIsFull()) {
                 int move = black->makeMove(true);
-                if (current_turn > 7) {
+                if (current_turn > 8) {
                     winner = game->checkForWin();
                 }
 
                 // update Q tables of red and black
                 black->update(winner, 1, move, curr_board_hash);
-                red->update(winner, 1, move, curr_board_hash);
 
-                game->dropPiece(move, 1);
+                game->dropPiece(move, -1);
 
             }
 
             // On win, record, reset, and restart
             if (winner) {
-                switch (winner) {
-                    case -1:
-                        games_won[0]++;
-                    case 1:
-                        games_won[1]++;
+                if (winner == 1) {
+                    red_wins++;
                 }
                 game->resetGame();
                 break;
             } else if (game->boardIsFull()) {
+                ties++;
                 game->resetGame();
                 break;
             }
         }
 
     }
+    std::cout << std::endl<<"\033[1;36mSTOP TRAINING\033[0m";
+    std::cout << std::endl<<"\033[1;36m";
+    std::cout << red_wins << ":" << (n_epochs-red_wins) << ":" << ties;
+    std::cout << "\033[0m" << std::endl;
+
     return 0;
 }
 
@@ -162,6 +162,7 @@ int humanMatch(QLearner * AI, Game * game) {
         game->dropPiece(AI_move, -1);
         int winner = game->checkForWin();
         board_txt = game->printBoard();
+        AI->showRews();
         std::cout << "\r" << board_txt << std::flush;
 
         // if red didn't win, it is blacks(user) move - get input, make move

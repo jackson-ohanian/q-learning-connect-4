@@ -21,6 +21,8 @@ QLearner::QLearner(Game * game, double a, int e, int id, int fsize) {
     this->state = 0;
     this->id = id;
     this->filter_size = fsize;
+    this->sub_state_locations_x = new int[HEIGHT*WIDTH];
+    this->sub_state_locations_y = new int[HEIGHT*WIDTH];
 }
 
 /**
@@ -56,8 +58,8 @@ int QLearner::greedyMove() {
     // track the position
     int left_pos = 0;
 
-    for (int ix = 0; ix < 12; ix++) {
-        left_pos = this->sub_state_locations[ix];
+    for (int ix = 0; ix < this->total_filters; ix++) {
+        left_pos = this->sub_state_locations_x[ix];
         int act = bestFromState(hashes[ix], max_so_far, left_pos);
         if (game->validMove(left_pos + act)) {
             continue;
@@ -66,6 +68,7 @@ int QLearner::greedyMove() {
             to_drop = act + left_pos;
             this->relative_action = act;
             this->state = hashes[ix];
+            this->hash_loc = ix;
             max_so_far = this->max_reward;
         }
     }
@@ -87,10 +90,15 @@ int QLearner::update(int winner, int player, int move, size_t hash) {
     if (move == -1) {
         return -1;
     }
-    // update the q table
+    // the current state
     size_t state = this->state;
-    size_t fut_state = game->getFutureBoard(move, player);
-    // Get old reward of this state / init if empty
+
+    // the future state
+    int a[6][7];
+    game->populateBoardlike(move, player, a);
+    size_t fut_state = getSubHash(sub_state_locations_x[hash_loc], sub_state_locations_y[hash_loc], a);
+
+    // Get rewards of these states -> init if empty
     if (!table.count(fut_state)) {
         this->table[fut_state]= new std::vector<float>(this->filter_size, (rand() % 100) * 0.01);
     }
@@ -103,15 +111,20 @@ int QLearner::update(int winner, int player, int move, size_t hash) {
     // Choose a reward for the new move
     int r = 0;
     if (winner == this->id) {
-        r = 500;
+        r = 1000;
     } else if (winner != 0) {
-        r = -500;
+        r = -800;
     } else {
         r = 1;
     }
-
-    // update with standard Q learning / gamma decay rate 0.7
-    float exp_future_reward = table[fut_state]->at(this->relative_action);
+    // Find max reward in the future
+    std::vector<float> * probs = table[fut_state];
+    float exp_future_reward = -100000;
+    for (int i = 0; i < this->filter_size; i++) {
+        if (probs->at(i) > exp_future_reward) {
+            exp_future_reward = probs->at(i);
+        }
+    }
     float new_ = old_reward + 0.5 * (r + 0.7 *  exp_future_reward);
     table[state]->at(this->relative_action) = new_;
     this->state = state;
@@ -129,7 +142,7 @@ void QLearner::showRews() {
     for (int i = 0; i < this->filter_size; i++) {
         std::cout << it->second->at(i) << " ";
     }
-    std::cout << std::endl;
+    std::cout << std::endl << this->relative_action << std::endl;
     return;
 }
 
@@ -140,7 +153,9 @@ void QLearner::showRews() {
  * @return 0 on success, non-zero on file error/fail to write
  */
 int QLearner::saveQ(std::string fname) {
-    std::ofstream stream(fname);
+    std::ofstream stream(fname, std::ofstream::trunc);
+    std::cout << "\033[1;32mSAVING... MAY TAKE A MINUTE\033[0m" << std::endl;
+
     int ct_saves = 0;
     for(auto& kv : this->table) {
         stream << (kv.first) << ",";
@@ -163,6 +178,7 @@ int QLearner::saveQ(std::string fname) {
  * @return a Q table
  */
 int QLearner::loadQ(std::string fname) {
+    std::cout << "\033[1;32mLOADING... MAY TAKE A MINUTE\033[0m" << std::endl;
     std::fstream newfile;
     newfile.open(fname, std::ios::in);
 
@@ -175,8 +191,13 @@ int QLearner::loadQ(std::string fname) {
             // identify the hash
             char * line_c = &line[0];
             size_t hash = (size_t) atoi(strtok(line_c, ","));
-            this->table[hash]= new std::vector<float>(this->filter_size, 0);
             // populate the vector with rewards as read
+            if (this->table.count(hash) != 0) {
+                continue;
+            } else {
+                this->table[hash]= new std::vector<float>(this->filter_size, 0);
+            }
+
             for (int i = 0; i < this->filter_size; i++) {
                 float value = (float) atoi(strtok(line_c, ","));
                 this->table[hash]->at(i) = value;
@@ -186,8 +207,8 @@ int QLearner::loadQ(std::string fname) {
         }
         newfile.close();
 
-        std::cout <<"\033[1;32mLOADED: \033[0m"<< ct_rows << " states and reward vectors to";
-        std::cout << "\033[1;32m " <<fname <<"\033[0m";
+        std::cout <<"\033[1;32mLOADED: \033[0m"<< ct_rows << " states and reward vectors from";
+        std::cout << "\033[1;32m " <<fname <<"\033[0m" << std::endl;
         return 0;
     } else {
         return -1;
@@ -202,10 +223,8 @@ int QLearner::loadQ(std::string fname) {
  */
 size_t* QLearner::convGreedyDecider() {
     int size = this->filter_size;
-    std::hash<std::string> hash;
 
     size_t* hashes = new size_t[HEIGHT*WIDTH];
-    this->sub_state_locations = new int[HEIGHT*WIDTH];
 
     int conv_ct = 0;
     std::string hold_conv = "";
@@ -213,45 +232,44 @@ size_t* QLearner::convGreedyDecider() {
     // For each location, great a filter
     for (int i = 0; i < this->HEIGHT - size; i++) {
         for (int j = 0; j < this->WIDTH - size; j++) {
-            int top_row_full = 0;
-            int is_empty = true;
-            // For each filter, for a string that represents piece positions
-            for (int ix = 0; ix < size; ix++) {
-                for (int jx = 0; jx < size; jx++) {
-                    // handle boards with a full top row / track fullness
-                    if (ix == 0 && this->game->board[i+ix][j+jx] != 0) {
-                        top_row_full++;
-                    }
-                    // check if this sub board is empty
-                    if (this->game->board[i+ix][j+jx] != 0) {
-                        is_empty = false;
-                    }
-                    hold_conv += std::to_string((this->game->board[i+ix][j+jx]));
-                }
-            }
+
 
             // Note the location of this hash for immediate movement
-            this->sub_state_locations[conv_ct] = j;
+            this->sub_state_locations_x[conv_ct] = j;
+            this->sub_state_locations_y[conv_ct] = i;
 
             // Save this hash
-            hashes[conv_ct] = hash(hold_conv);
+            hashes[conv_ct] = getSubHash(i, j, this->game->board);
 
-            // handle full top row
-            if (top_row_full == this->filter_size) {
-                hashes[conv_ct] = 0;
-            }
-            if (is_empty) {
-                hashes[conv_ct] = 1;
-            }
+
             hold_conv = "";
             conv_ct++;
         }
     }
-
+    this->total_filters = conv_ct;
     return hashes;
 }
 
-
+size_t QLearner::getSubHash(int i, int j, int board[6][7]) {
+    std::hash<std::string> hash;
+    int top_row_full = 0;
+    int size = this->filter_size;
+    std::string hold_conv = "";
+    // For each filter, for a string that represents piece positions
+    for (int ix = 0; ix < size && i + ix < HEIGHT; ix++) {
+        for (int jx = 0; jx < size && j + jx < WIDTH; jx++) {
+            // handle boards with a full top row / track fullness
+            if (ix == 0 && board[i+ix][j+jx] != 0) {
+                top_row_full++;
+            }
+            hold_conv += std::to_string((board[i+ix][j+jx]));
+        }
+    }
+    if (top_row_full == this->filter_size) {
+        return 0;
+    }
+    return hash(hold_conv);
+}
 /**
  * Find the best move for the current sub-state
  * @return the best (most rewarded) move

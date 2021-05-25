@@ -15,7 +15,6 @@
 Game::Game() {
     // init board to empty (0)
     for (int i = 0; i < HEIGHT; i++) {
-        board[i] = new int [HEIGHT];
         for (int j = 0; j < WIDTH; j++) {
             board[i][j] = 0;
         }
@@ -30,7 +29,6 @@ Game::Game() {
 void Game::resetGame() {
     // reset all values to empty (0)
     for (int i = 0; i < HEIGHT; i++) {
-        board[i] = new int [HEIGHT];
         for (int j = 0; j < WIDTH; j++) {
             board[i][j] = 0;
         }
@@ -58,20 +56,15 @@ size_t Game::getBoard() {
     return hash(s);
 }
 
-
-/**
- * Hashes the board after a new move uniquely for sake of Q learner
- * @return a unique hash of the board
- */
-size_t Game::getFutureBoard(int coord, int player) {
-    std::hash<std::string> hash;
-    std::string s = "";
+int Game::populateBoardlike(int coord, int player, int (&new_)[6][7]) {
     int y = dropPiece(coord, player);
-    size_t hashed = getBoard();
-    if (y >= 0) {
-        board[y][coord] = 0;
+    for (int i = 0; i < 6; i++) {
+        for (int j = 0; j < 7; j++) {
+            new_[i][j] = board[i][j];
+        }
     }
-    return hashed;
+    board[y][coord] = 0;
+    return 0;
 }
 
 
@@ -152,7 +145,7 @@ int Game::dropPiece(int coord, int player) {
  * @return true if full, false otherwise
  */
 bool Game::boardIsFull() {
-    for (int i = 0; i < HEIGHT; i++) {
+    for (int i = 0; i < WIDTH; i++) {
         if (board[0][i] == 0)
             return false;
     }
@@ -176,7 +169,6 @@ int Game::checkForWin() {
                 current = board[i][j]; streak = 0;
             }
             if (streak == TO_WIN - 1) {
-                std::cout << "win in row " << i << std::endl;
                 return current;
             }
         }

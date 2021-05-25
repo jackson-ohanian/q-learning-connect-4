@@ -48,11 +48,7 @@ class Game {
          */
         size_t getBoard();
 
-        /**
-         * Hashes the board after a new move uniquely for sake of Q learner
-         * @return a unique hash of the board
-         */
-        size_t getFutureBoard(int coord, int player);
+        int populateBoardlike(int coord, int player, int (&new_)[6][7]);
 
 
         /**
@@ -74,7 +70,7 @@ class Game {
          bool boardIsFull();
 
          // The board of this game
-         int* board[7];
+         int board[6][7];
 
     private:
         // Const. Width of the board

@@ -89,19 +89,30 @@ class QLearner {
          */
         int bestFromState(size_t state, float target, int left_pos);
 
+        /**
+         * Make a hash for a board at the given position
+         * return the hash
+         */
+        size_t getSubHash(int i, int j, int board[6][7]);
 
         // The game that this QLearner is playing in
         Game * game;
+        // A temporary future
+        Game * fut_game;
         // The current state of the current game
         size_t state;
         // The current (most recent) action taken by this learner
         int action;
         // The game id (-1/1) = (red/black) of this QLearner
         int id;
+        // int hash index / locs
+        int hash_loc;
         // Learning rate alpha
         double alpha;
         // define epsilon greedy action with random action chance 1/epsilon
         int epsilon;
+        // total filters on the convulation
+        int total_filters;
         // a file to save Q Table to
         std::ofstream save_movement;
         // The board height
@@ -114,7 +125,10 @@ class QLearner {
         int filter_size;
         // The relative action taken in the current sub-state
         int relative_action;
-        // the locations of eahc current sub-state
-        int* sub_state_locations;
+
+        // the locations of each current sub-state
+        int* sub_state_locations_x;
+        int* sub_state_locations_y;
+
 
 };
