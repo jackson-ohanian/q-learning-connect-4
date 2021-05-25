@@ -291,8 +291,8 @@ int QLearner::bestFromState(size_t hash, float target, int left_pos) {
     float best_rew = 0;
     int ct_stuck = 0;
     while (this->game->validMove(max + left_pos) != 0) {
-        best_rew = -100000;
-        probs->at(max) = -100000;
+        best_rew = 0;
+        probs->at(max) = 0;
         for (int i = 0; i < this->filter_size; i++) {
             if (i != max && probs->at(i) > best_rew) {
                 max = i;
@@ -307,4 +307,18 @@ int QLearner::bestFromState(size_t hash, float target, int left_pos) {
 
     this->max_reward = probs->at(max);
     return max;
+}
+
+
+/**
+ * Update a loss on this player
+ * @return void
+ */
+void QLearner::updateLoss() {
+    // Update the current state/action pair with a loss
+    if (!table.count(this->state)) {
+        table[this->state]= new std::vector<float>(this->filter_size, (rand() % 100) * 0.01);
+    }
+    table[this->state]->at(this->relative_action) = -800;
+    return;
 }

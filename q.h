@@ -66,6 +66,12 @@ class QLearner {
          */
         void showRews();
 
+        /**
+         * Update a loss on this player
+         * @return void
+         */
+        void updateLoss();
+
     private:
         // The Q table for this QLearner
         std::map<size_t, std::vector<float>*> table;

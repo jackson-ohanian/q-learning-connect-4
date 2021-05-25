@@ -122,10 +122,13 @@ int trainAI(QLearner * red, QLearner * black, Game * game, int n_epochs) {
 
             }
 
-            // On win, record, reset, and restart
+            // On win, record, reset, and restart - adjust Qs accordingly
             if (winner) {
                 if (winner == 1) {
                     red_wins++;
+                    black->updateLoss();
+                } else {
+                    red->updateLoss();
                 }
                 game->resetGame();
                 break;
