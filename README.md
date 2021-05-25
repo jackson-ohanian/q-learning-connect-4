@@ -3,7 +3,7 @@ Q RL applied to the connect 4 game.
 
 ## Usage ## 
 
-  Run driver.cpp with c++11 or higher.
+  Run driver.cpp with c++11 or higher. The AI#.txt files hold sample training data of that filter size. 
   
 ## About the Training ##
 
