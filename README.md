@@ -10,8 +10,13 @@ Q RL applied to the connect 4 game.
   Double Q Learning, two AIs compete for given epochs, focused on training one and using the other to influence that training. 
 
   A convulation-like filter is put over the board (stride=1, padding=0) the larger the size the more computational power and memory is needed.. to do a full 7x6 
-  board is pretty signifigant (some billions of boards from quick math), anything under 4 is borderline useless. The downside here is he will miss blocks sometimes
+  board is pretty signifigant (some trillions of boards from quick math), anything under 4 is borderline useless. The downside here is he will miss blocks sometimes
   chasing a high reward play on a different side of the board. More info in header documentation.
+  
+  Even a 4x4 filter, which is of limited use, has over 20,000,000 possible states, a lot of which can be removed by considering cases such as a
+  completely full board as non-unique. For filter size n this reduces the amount of state vectors needed by 2^(2n). Overall, the computation and storage needed to
+  make this learner very smart are high - I don't think this task is necesarily better suited to deep Q Learning, however, as precise choices are needed, not
+  descisions. 
   
   Training is epsilon greedy to encourage exploratory action. High decay rate to give the AI more freedom to make multi-turn plays. 
   
