@@ -13,7 +13,7 @@ Q RL applied to the connect 4 game.
   board is pretty signifigant (some trillions of boards from quick math), anything under 4 is borderline useless. The downside here is he will miss blocks sometimes
   chasing a high reward play on a different side of the board. More info in header documentation.
   
-  Even a 4x4 filter, which is of limited use, has over 20,000,000 possible states, a lot of which can be removed by considering cases such as a
+  Even a 4x4 filter, which is of limited use, has over many millions of possible states, a lot of which can be removed by considering cases such as a
   completely full board as non-unique. For filter size n this reduces the amount of state vectors needed by 2^(2n). Overall, the computation and storage needed to
   make this learner very smart are high - I don't think this task is necesarily better suited to deep Q Learning, however, as precise choices are needed, not
   descisions. 
